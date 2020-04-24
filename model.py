@@ -45,7 +45,7 @@ class Actor(nn.Module):
 
         x = F.leaky_relu(self.fc1(state))
         x = F.leaky_relu(self.fc2(x))
-        return torch.tanh(self.fc3(x))
+        return F.tanh(self.fc3(x))
 
 
 class Critic(nn.Module):
@@ -83,4 +83,4 @@ class Critic(nn.Module):
         xs = F.leaky_relu(self.fc1(state))
         x = torch.cat((xs, action), dim=1)
         x = F.leaky_relu(self.fc2(x))
-        return self.fc3(x)
+        return F.tanh(self.fc3(x))
