@@ -10,12 +10,12 @@ import torch.nn.functional as F
 import torch.optim as optim
 
 BUFFER_SIZE = int(1e6)  # replay buffer size
-BATCH_SIZE = 512       # minibatch size
+BATCH_SIZE = 256       # minibatch size
 GAMMA = 0.99            # discount factor
 TAU = 1e-3              # for soft update of target parameters
 LR_ACTOR = 3e-4         # learning rate of the actor 
 LR_CRITIC = 1e-4        # learning rate of the critic
-WEIGHT_DECAY = 1e-5      # L2 weight decay
+WEIGHT_DECAY = 0        # L2 weight decay
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -57,25 +57,13 @@ class Agent():
     def step(self, states, actions, rewards, next_states, dones):
         """Save experience in replay memory, and use random sample from buffer to learn."""
         # Save experience / reward for all agents
-        
-        self.timesteps += 1
         for i in range(self.num_agents):
-            self.memory.add(states[i], actions[i], rewards[i], next_states[i], dones[i])
+            self.memory.add(states[i,:], actions[i,:], rewards[i], next_states[i,:], dones[i])
 
-        if (len(self.memory) > BATCH_SIZE) and (self.timesteps % 20 == 0):
-            for _ in range(10):
-                experiences = self.memory.sample()
-                self.learn(experiences, GAMMA)
-        
-        
-        
-        #for i in range(self.num_agents):
-        #    self.memory.add(states[i], actions[i], rewards[i], next_states[i], dones[i])
-
-        # Learn, if enough samples are available in memory
-        #if len(self.memory) > BATCH_SIZE:
-        #    experiences = self.memory.sample()
-        #    self.learn(experiences, GAMMA)
+        # Learn, if enough samples are available in memory        
+        if len(self.memory) > BATCH_SIZE:
+            experiences = self.memory.sample()
+            self.learn(experiences)
 
     def act(self, states, add_noise=True):
         """Returns actions for given state as per current policy."""
@@ -92,7 +80,7 @@ class Agent():
     def reset(self):
         self.noise.reset()
 
-    def learn(self, experiences, gamma):
+    def learn(self, experiences):
         """Update policy and value parameters using given batch of experience tuples.
         Q_targets = r + γ * critic_target(next_state, actor_target(next_state))
         where:
@@ -102,7 +90,6 @@ class Agent():
         Params
         ======
             experiences (Tuple[torch.Tensor]): tuple of (s, a, r, s', done) tuples 
-            gamma (float): discount factor
         """
         states, actions, rewards, next_states, dones = experiences
 
@@ -111,7 +98,7 @@ class Agent():
         actions_next = self.actor_target(next_states)
         Q_targets_next = self.critic_target(next_states, actions_next)
         # Compute Q targets for current states (y_i)
-        Q_targets = rewards + (gamma * Q_targets_next * (1 - dones))
+        Q_targets = rewards + (GAMMA * Q_targets_next * (1 - dones))
         # Compute critic loss
         Q_expected = self.critic_local(states, actions)
         critic_loss = F.mse_loss(Q_expected, Q_targets)
