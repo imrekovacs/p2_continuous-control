@@ -35,6 +35,7 @@ class Actor(nn.Module):
         self.reset_parameters()
 
     def reset_parameters(self):
+        # weight initialization with self.weight.data.uniform_(-stdv, stdv), with stdv=standard deviation
         self.fc1.weight.data.uniform_(*hidden_init(self.fc1))
         self.fc2.weight.data.uniform_(*hidden_init(self.fc2))
         self.fc3.weight.data.uniform_(-3e-3, 3e-3)
@@ -72,6 +73,7 @@ class Critic(nn.Module):
         self.reset_parameters()
 
     def reset_parameters(self):
+        # weight initialization with self.weight.data.uniform_(-stdv, stdv), with stdv=standard deviation
         self.fc1.weight.data.uniform_(*hidden_init(self.fc1))
         self.fc2.weight.data.uniform_(*hidden_init(self.fc2))  
         self.fc3.weight.data.uniform_(-3e-3, 3e-3)

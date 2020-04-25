@@ -10,10 +10,10 @@ import torch.nn.functional as F
 import torch.optim as optim
 
 BUFFER_SIZE = int(1e5)  # replay buffer size
-BATCH_SIZE = 128       # minibatch size
+BATCH_SIZE = 256        # minibatch size
 GAMMA = 0.99            # discount factor
 TAU = 1e-3              # for soft update of target parameters
-LR_ACTOR = 1e-3         # learning rate of the actor 
+LR_ACTOR = 3e-4         # learning rate of the actor 
 LR_CRITIC = 3e-4        # learning rate of the critic
 WEIGHT_DECAY = 0        # L2 weight decay
 
@@ -160,10 +160,15 @@ class ReplayBuffer:
 
     def __init__(self, action_size, buffer_size, batch_size, seed):
         """Initialize a ReplayBuffer object.
+        The Replay Buffer is used for experience replay to improve learning by learning, remembering and re-experiencing the past. 
+        In order to break temporal correlations, the experience replay is done by quasi-random and uniform sampling. 
+        It also reduces the number of required experiences.
         Params
         ======
+            action_size (int): size of action space
             buffer_size (int): maximum size of buffer
             batch_size (int): size of each training batch
+            seed (int): random seed value
         """
         self.action_size = action_size
         self.memory = deque(maxlen=buffer_size)  # internal memory (deque)
